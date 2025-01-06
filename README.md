@@ -9,4 +9,5 @@ This tool allows users to temporarily disable Windows Defender's scanning and pr
 
 ## Usage
 
-After following the above steps, run the program to disable Windows Defender policies.![pic](https://github.com/user-attachments/assets/865fd8da-fbd1-4bca-a105-76f7a203c127)
+After following the above steps, run the program to disable Windows Defender policies. 
+![pic](https://github.com/user-attachments/assets/420b023b-993b-43c5-8c31-37e06c88cb3c)
