@@ -8,13 +8,12 @@ class Defcon
 {
     static void Main()
     {
-        // Check if the application is running as administrator
         if (!IsAdministrator())
         {
             Console.WriteLine("This application needs to run as administrator.");
             Console.WriteLine("Please run this program as Administrator.");
             RestartAsAdmin();
-            return; // Exit after prompting to restart
+            return;
         }
 
         Console.Clear();
@@ -40,37 +39,38 @@ class Defcon
             Console.WriteLine(new string(' ', spaces) + line);
         }
 
-        // Center the "Enter 1 to disable Windows Defender policy." message
         Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.DarkYellow;  // Orange-like color
-        string message = "Enter 1 to disable Windows Defender policy.";
-        int messagePadding = (windowWidth - message.Length) / 2; // Center message
-        Console.SetCursorPosition(messagePadding, Console.CursorTop);
-        Console.WriteLine(message);
-
-        // Move the cursor to just below the message
-        Console.SetCursorPosition(messagePadding, Console.CursorTop + 1);
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.WriteLine("\n Options: \n");
+        Console.WriteLine("  1. Disable Windows Defender policy. \n");
+        Console.WriteLine("  2. Revert Windows Defender policy.");
+        Console.Write("\n Enter your choice: ");
 
         string userInput = Console.ReadLine();
 
         if (userInput == "1")
         {
-            Console.Clear();  // Clear the screen after pressing 1
+            Console.Clear();
+            ShowFakeLoadingEffect();
             ModifyDefenderPolicy();
+        }
+        else if (userInput == "2")
+        {
+            Console.Clear();
+            ShowFakeLoadingEffect();
+            RevertDefenderPolicy();
         }
         else
         {
             Console.WriteLine("Invalid input, exiting...");
         }
 
-        // Wait for the user to acknowledge before closing
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey();
     }
 
     static bool IsAdministrator()
     {
-        // Check if the current user has administrator privileges
         var identity = WindowsIdentity.GetCurrent();
         var principal = new WindowsPrincipal(identity);
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
@@ -80,11 +80,10 @@ class Defcon
     {
         try
         {
-            // Get the current executable path and restart with admin privileges
             string exePath = Process.GetCurrentProcess().MainModule.FileName;
             ProcessStartInfo startInfo = new ProcessStartInfo(exePath)
             {
-                Verb = "runas", // Request elevated privileges
+                Verb = "runas",
                 UseShellExecute = true,
                 CreateNoWindow = true
             };
@@ -100,13 +99,11 @@ class Defcon
     {
         try
         {
-            // Base Registry Path for Windows Defender
             string registryKeyPath = @"SOFTWARE\Policies\Microsoft\Windows Defender";
             using (RegistryKey key = Registry.LocalMachine.CreateSubKey(registryKeyPath))
             {
                 if (key != null)
                 {
-                    // Modify the registry values as per your requirements
                     key.SetValue("DisableAntiSpyware", 1, RegistryValueKind.DWord);
                     key.SetValue("DisableRealtimeMonitoring", 1, RegistryValueKind.DWord);
                     key.SetValue("DisableAntiVirus", 1, RegistryValueKind.DWord);
@@ -143,60 +140,129 @@ class Defcon
                             spynetKey.SetValue("DisableBlockAtFirstSeen", 1, RegistryValueKind.DWord);
                         }
                     }
-
-                    // Simulate a loading animation with random text moving up
-                    ShowLoadingAnimation();
-
-                    // Centered Done message
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    int finalMessageSpaces = (Console.WindowWidth - "*** Done! Please restart your system for the changes to take effect. ***".Length) / 2;
-                    Console.SetCursorPosition(finalMessageSpaces, Console.CursorTop);
-                    Console.WriteLine("*** Done! Please restart your system for the changes to take effect. ***");
                 }
             }
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("\n*** Done! Please restart your system for the changes to take effect. ***");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred while modifying the registry: {ex.Message}");
+            Console.WriteLine($"\nAn error occurred while modifying the registry: {ex.Message}");
         }
     }
 
-    static void ShowLoadingAnimation()
+    static void RevertDefenderPolicy()
     {
-        // Set the color to green for the random text
-        Console.ForegroundColor = ConsoleColor.Green;
+        try
+        {
+            string registryKeyPath = @"SOFTWARE\Policies\Microsoft\Windows Defender";
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(registryKeyPath, true))
+            {
+                if (key != null)
+                {
+                    key.DeleteValue("DisableAntiSpyware", false);
+                    key.DeleteValue("DisableRealtimeMonitoring", false);
+                    key.DeleteValue("DisableAntiVirus", false);
+                    key.DeleteValue("DisableSpecialRunningModes", false);
+                    key.DeleteValue("DisableRoutinelyTakingAction", false);
+                    key.DeleteValue("ServiceKeepAlive", false);
 
-        // List of random strings to simulate the loading effect
-        string[] randomMessages = new string[] {
-            "Initializing settings...",
-            "Checking system configuration...",
-            "Applying security changes...",
-            "Loading system data...",
-            "Updating policies...",
-            "Verifying system integrity...",
-            "Optimizing settings...",
-            "Preparing to disable Defender...",
-            "Finalizing changes...",
-            "Please wait, completing configuration..."
+                    DeleteSubKeyTreeIfEmpty(key, "Real-Time Protection");
+                    DeleteSubKeyTreeIfEmpty(key, "Signature Updates");
+                    DeleteSubKeyTreeIfEmpty(key, "Spynet");
+
+                    if (key.ValueCount == 0 && key.SubKeyCount == 0)
+                    {
+                        Registry.LocalMachine.DeleteSubKeyTree(registryKeyPath, false);
+                    }
+                }
+            }
+
+            EnableRealTimeProtection();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("\nChanges reverted successfully. Please restart your system.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nAn error occurred while reverting the registry: {ex.Message}");
+        }
+    }
+
+    static void EnableRealTimeProtection()
+    {
+        try
+        {
+            string registryKeyPath = @"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection";
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(registryKeyPath, true))
+            {
+                if (key != null)
+                {
+                    key.DeleteValue("DisableBehaviorMonitoring", false);
+                    key.DeleteValue("DisableOnAccessProtection", false);
+                    key.DeleteValue("DisableRealtimeMonitoring", false);
+                    key.DeleteValue("DisableScanOnRealtimeEnable", false);
+                }
+            }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "sc",
+                Arguments = "config WinDefend start= auto",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            }).WaitForExit();
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "sc",
+                Arguments = "start WinDefend",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            }).WaitForExit();
+
+            Console.WriteLine("\nReal-time protection has been re-enabled.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nAn error occurred while enabling real-time protection: {ex.Message}");
+        }
+    }
+
+    static void DeleteSubKeyTreeIfEmpty(RegistryKey parentKey, string subKeyName)
+    {
+        using (RegistryKey subKey = parentKey.OpenSubKey(subKeyName, true))
+        {
+            if (subKey != null && subKey.ValueCount == 0 && subKey.SubKeyCount == 0)
+            {
+                parentKey.DeleteSubKeyTree(subKeyName, false);
+            }
+        }
+    }
+
+    static void ShowFakeLoadingEffect()
+    {
+        string[] fakeMessages = {
+            "Loading system registry...",
+            "Checking policy states...",
+            "Applying changes...",
+            "Finalizing...",
+            "Operation successful..."
         };
 
-        Random rand = new Random();
-        int consoleWidth = Console.WindowWidth;
-        int consoleHeight = Console.WindowHeight;
+        Console.ForegroundColor = ConsoleColor.Green;
+        int windowWidth = Console.WindowWidth;
+        int windowHeight = Console.WindowHeight;
+        int startingRow = windowHeight / 2;
 
-        // Fast scrolling random text from the middle to the bottom
-        int startPos = consoleHeight / 2 - 5; // Start from a little above the center
-        for (int i = 0; i < 20; i++)  // Show random text for 10 seconds (about 20 iterations)
+        foreach (string message in fakeMessages)
         {
-            // Print a random message at a dynamic position
-            string message = randomMessages[rand.Next(randomMessages.Length)];
-            int spaces = (consoleWidth - message.Length) / 2;
-            Console.SetCursorPosition(spaces, startPos + i); // Move down
+            int spaces = (windowWidth - message.Length) / 2;
+            Console.SetCursorPosition(spaces, startingRow++);
             Console.WriteLine(message);
-            Thread.Sleep(200);  // Speed up scrolling (200ms per update)
+            Thread.Sleep(2000);
         }
-
-        // Wait for the loading effect to be over, and show a final message
-        Thread.Sleep(1000);  // Wait for a second before showing "done"
+        Console.ResetColor();
     }
 }
