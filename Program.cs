@@ -27,7 +27,7 @@ class Defcon
 ╚═════╝ ╚══════╝╚═╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝
 
     By ZX_Coder
-    github: https://github.com/charlotte-zee?tab=repositories                
+    github: https://github.com/charlotte-zee/DefCon                
         ";
 
         int windowWidth = Console.WindowWidth;
