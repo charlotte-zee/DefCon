@@ -11,4 +11,5 @@ This tool allows users to temporarily disable Windows Defender's scanning and pr
 
 After following the above steps, run the program to disable Windows Defender policies and Realtime Protection.
 
-![Screenshot 2025-01-12 011537](https://github.com/user-attachments/assets/2d64112e-d2ba-4639-80d3-58436f7bdd3b)
+
+![Screenshot 2025-01-12 011537](https://github.com/user-attachments/assets/47fdc3d5-2655-4caa-849e-e063151f1c99)
