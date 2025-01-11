@@ -40,10 +40,18 @@ class Defcon
         }
 
         Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("\n Options: \n");
-        Console.WriteLine("  1. Disable Windows Defender policy. \n");
-        Console.WriteLine("  2. Revert Windows Defender policy.");
+        Console.WriteLine("______________________________________ \n");
+        Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("  1. Disable Windows Defender policy. |\n");
+        Console.WriteLine("  2. Revert Windows Defender policy.  |\n");
+        Console.WriteLine("  3. Disable Real-time Protection.    |\n");
+        Console.WriteLine("  4. Enable Real-time Protection.     |");
+        Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("______________________________________ \n");
         Console.Write("\n Enter your choice: ");
 
         string userInput = Console.ReadLine();
@@ -59,6 +67,18 @@ class Defcon
             Console.Clear();
             ShowFakeLoadingEffect();
             RevertDefenderPolicy();
+        }
+        else if (userInput == "3")
+        {
+            Console.Clear();
+            ShowFakeLoadingEffect();
+            RunPlugin("defconplugds.exe");
+        }
+        else if (userInput == "4")
+        {
+            Console.Clear();
+            ShowFakeLoadingEffect();
+            RunPlugin("defconplugen.exe");
         }
         else
         {
@@ -264,5 +284,26 @@ class Defcon
             Thread.Sleep(2000);
         }
         Console.ResetColor();
+    }
+
+    static void RunPlugin(string exeName)
+    {
+        try
+        {
+            string exePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins", exeName);
+            ProcessStartInfo startInfo = new ProcessStartInfo(exePath)
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+            Process.Start(startInfo).WaitForExit();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("\nOperation completed. Please restart your system.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nAn error occurred while running the plugin: {ex.Message}");
+        }
     }
 }
