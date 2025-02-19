@@ -14,6 +14,6 @@ After following the above steps, run the program to disable Windows Defender pol
 
 ![Screenshot 2025-01-12 011537](https://github.com/user-attachments/assets/47fdc3d5-2655-4caa-849e-e063151f1c99)
 
-## Version 2 released! 
+## Version 2 released! ( Winodws 11 24H2 Lateast Support )
 
 ![Screenshot 2025-02-19 111912](https://github.com/user-attachments/assets/8367a7e0-59ed-43c5-9d5c-08c4465dec5e)
